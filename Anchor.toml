@@ -1,0 +1,15 @@
+[programs.localnet]
+crowdfund = "HK8ZVTatXSc8gWfZBaHKGPP9fWNDR4AnCk85xWy7KsVU"
+
+[programs.devnet]
+crowdfund = "HK8ZVTatXSc8gWfZBaHKGPP9fWNDR4AnCk85xWy7KsVU"
+
+[provider]
+cluster = "devnet"
+wallet = "~/.config/solana/id.json"
+
+[workspace]
+members = ["programs/crowdfund"]
+
+[toolchain]
+anchor_version = "0.32.1"

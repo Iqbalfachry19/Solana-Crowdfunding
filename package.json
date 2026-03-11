@@ -1,0 +1,13 @@
+{
+  "name": "anchor-crowdfund",
+  "private": true,
+  "devDependencies": {
+    "@coral-xyz/anchor": "^0.31.1",
+    "@types/chai": "^4.3.11",
+    "@types/mocha": "^10.0.6",
+    "chai": "^4.3.10",
+    "mocha": "^10.4.0",
+    "ts-mocha": "^10.0.0",
+    "typescript": "^5.4.5"
+  }
+}
