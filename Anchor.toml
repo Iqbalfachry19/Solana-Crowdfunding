@@ -1,8 +1,5 @@
-[programs.localnet]
-crowdfund = "HK8ZVTatXSc8gWfZBaHKGPP9fWNDR4AnCk85xWy7KsVU"
-
 [programs.devnet]
-crowdfund = "HK8ZVTatXSc8gWfZBaHKGPP9fWNDR4AnCk85xWy7KsVU"
+crowdfund = "BNFAjhZF1EsQZpcKCGv3tEuc4mDucQtrAVphYQHoNLU"
 
 [provider]
 cluster = "devnet"
