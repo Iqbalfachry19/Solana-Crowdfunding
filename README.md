@@ -20,7 +20,17 @@ Anchor-based implementation of the crowdfunding spec.
 anchor build
 ```
 
+## Test
+
+```bash
+anchor test
+```
+
 ## Deploy
+
+```bash
+anchor deploy --provider.cluster devnet
+```
 - Program Id: BNFAjhZF1EsQZpcKCGv3tEuc4mDucQtrAVphYQHoNLU
 - Signature: 3KyrURS1hxpw1AAgwh2gtK62BDQgrde8Qmn448W3CNyArJynR2JxSiLxT1FdnStQAHaoWeJhmiZxFdUK51Ay9YnQ
 

@@ -11,31 +11,41 @@ describe("crowdfund", () => {
 
   const program = anchor.workspace.Crowdfund as Program<Crowdfund>;
 
-  const airdrop = async (pubkey: anchor.web3.PublicKey, sol: number) => {
-    const sig = await provider.connection.requestAirdrop(
-      pubkey,
-      sol * anchor.web3.LAMPORTS_PER_SOL
-    );
-    const latestBlockhash = await provider.connection.getLatestBlockhash("confirmed");
-    await provider.connection.confirmTransaction(
-      {
-        signature: sig,
-        ...latestBlockhash,
-      },
-      "confirmed"
-    );
+  const isDevnet = provider.connection.rpcEndpoint.includes("devnet");
+
+  const airdrop = async (pubkey: anchor.web3.PublicKey, amountSol: number) => {
+    try {
+      console.log(`[Airdrop] Requesting ${amountSol} SOL for ${pubkey.toBase58()}...`);
+      const sig = await provider.connection.requestAirdrop(
+        pubkey,
+        amountSol * anchor.web3.LAMPORTS_PER_SOL
+      );
+      const latestBlockhash = await provider.connection.getLatestBlockhash("confirmed");
+      await provider.connection.confirmTransaction(
+        {
+          signature: sig,
+          ...latestBlockhash,
+        },
+        "confirmed"
+      );
+      console.log(`[Airdrop] Successfully airdropped ${amountSol} SOL`);
+    } catch (e) {
+      console.error(`[Airdrop] Failed to airdrop: ${e}`);
+    }
   };
 
+  it("follows the checklist on localnet", async function () {
+    if (isDevnet) {
+      console.log("Skipping localnet test because we are on devnet.");
+      return this.skip();
+    }
 
-  it("follows the checklist on localnet", async () => {
     const campaign = Keypair.generate();
     const donor = Keypair.generate();
     console.log(`[Setup] Created campaign at ${campaign.publicKey.toBase58()}`);
     console.log(`[Setup] Donor is ${donor.publicKey.toBase58()}`);
 
     await airdrop(donor.publicKey, 1200);
-    console.log(`[Setup] Airdropped 1200 SOL to donor`);
-
 
     const now = Math.floor(Date.now() / 1000);
     const deadline = new anchor.BN(now + 2); // 2 seconds from now
@@ -112,6 +122,98 @@ describe("crowdfund", () => {
       console.log(`[Check] Correctly received expected error: AlreadyClaimed`);
       expect(`${err}`).to.contain("AlreadyClaimed");
     }
-    console.log(`[Success] All checks passed!`);
+    console.log(`[Success] All checks passed for localnet!`);
+  });
+
+  it("follows the checklist on devnet", async function () {
+    if (!isDevnet) {
+      console.log("Skipping devnet test because we are on localnet.");
+      return this.skip();
+    }
+
+    const campaign = Keypair.generate();
+    const donor = Keypair.generate();
+    console.log(`[Setup] Created campaign at ${campaign.publicKey.toBase58()}`);
+    console.log(`[Setup] Donor is ${donor.publicKey.toBase58()}`);
+
+
+    await airdrop(donor.publicKey, 1.5);
+
+    const now = Math.floor(Date.now() / 1000);
+    const deadline = new anchor.BN(now + 10); // 10 seconds from now
+    const goal = new anchor.BN(1 * anchor.web3.LAMPORTS_PER_SOL);
+
+    console.log(`[Campaign] Creating campaign: Goal=${goal.div(new anchor.BN(anchor.web3.LAMPORTS_PER_SOL))} SOL, Deadline=${deadline}`);
+    await program.methods
+      .createCampaign(goal, deadline)
+      .accounts({
+        campaign: campaign.publicKey,
+      })
+      .signers([campaign])
+      .rpc();
+    console.log(`[Campaign] Campaign created at ${campaign.publicKey.toBase58()}`);
+
+    console.log(`[Contribute] Donor contributing 0.6 SOL...`);
+    await program.methods
+      .contribute(new anchor.BN(0.6 * anchor.web3.LAMPORTS_PER_SOL))
+      .accounts({
+        donor: donor.publicKey,
+        campaign: campaign.publicKey,
+      })
+      .signers([donor])
+      .rpc();
+    console.log(`[Contribute] Donation of 0.6 SOL successful`);
+
+    console.log(`[Contribute] Donor contributing 0.5 SOL...`);
+    await program.methods
+      .contribute(new anchor.BN(0.5 * anchor.web3.LAMPORTS_PER_SOL))
+      .accounts({
+        donor: donor.publicKey,
+        campaign: campaign.publicKey,
+      })
+      .signers([donor])
+      .rpc();
+    console.log(`[Contribute] Donation of 0.5 SOL successful (Total: 1.1 SOL)`);
+
+    console.log(`[Check] Attempting withdrawal BEFORE deadline...`);
+    try {
+      await program.methods
+        .withdraw()
+        .accounts({
+          campaign: campaign.publicKey,
+        })
+        .rpc();
+      throw new Error("withdraw before deadline should fail");
+    } catch (err) {
+      console.log(`[Check] Correctly received expected error: CampaignNotEnded`);
+      expect(`${err}`).to.contain("CampaignNotEnded");
+    }
+
+    console.log(`[Wait] Waiting 15 seconds for campaign to end (Deadline: ${deadline})...`);
+    await new Promise((r) => setTimeout(r, 15000));
+
+    console.log(`[Withdraw] Attempting withdrawal AFTER deadline...`);
+    await program.methods
+      .withdraw()
+      .accounts({
+        campaign: campaign.publicKey,
+      })
+      .rpc();
+    console.log(`[Withdraw] Funds successfully withdrawn by creator`);
+
+    console.log(`[Check] Attempting double withdrawal...`);
+    try {
+      await program.methods
+        .withdraw()
+        .accounts({
+          campaign: campaign.publicKey,
+        })
+        .rpc();
+      throw new Error("withdraw after claim should fail");
+    } catch (err) {
+      console.log(`[Check] Correctly received expected error: AlreadyClaimed`);
+      expect(`${err}`).to.contain("AlreadyClaimed");
+    }
+    console.log(`[Success] All checks passed for devnet!`);
   });
 });

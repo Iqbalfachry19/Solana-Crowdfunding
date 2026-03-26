@@ -8,6 +8,7 @@ crowdfund = "BNFAjhZF1EsQZpcKCGv3tEuc4mDucQtrAVphYQHoNLU"
 cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
+
 [scripts]
 test = "npx ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
 
