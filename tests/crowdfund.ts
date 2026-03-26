@@ -26,25 +26,6 @@ describe("crowdfund", () => {
     );
   };
 
-  const warpToAfter = async (deadline: number) => {
-    const slot = await provider.connection.getSlot("processed");
-    const current = Math.floor(Date.now() / 1000);
-    console.log(`[Warp] Starting at slot ${slot}, current time: ${current}, target deadline: ${deadline}`);
-    if (current >= deadline) return;
-    const secondsAhead = deadline - current + 10; // increase margin to 10s
-    const approxSlotTime = 0.4;
-    const slotsToAdvance = Math.ceil(secondsAhead / approxSlotTime);
-    const targetSlot = slot + slotsToAdvance;
-    console.log(`[Warp] Advancing to slot ${targetSlot} (+${slotsToAdvance} slots)...`);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const res = await (provider.connection as any)._rpcRequest("warp", [targetSlot]);
-    console.log(`[Warp] RPC Result: ${JSON.stringify(res)}`);
-
-    // Wait a bit and verify
-    await new Promise((r) => setTimeout(r, 1000));
-    const finalSlot = await provider.connection.getSlot();
-    console.log(`[Warp] Finalized at slot ${finalSlot}`);
-  };
 
   it("follows the checklist on localnet", async () => {
     const campaign = Keypair.generate();
