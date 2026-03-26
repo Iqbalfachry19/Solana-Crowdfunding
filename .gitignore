@@ -3,3 +3,4 @@
 /test-ledger
 **/.DS_Store
 **/*.log
+/.anchor

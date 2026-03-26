@@ -1,6 +1,7 @@
 {
   "name": "anchor-crowdfund",
   "private": true,
+  "type": "module",
   "devDependencies": {
     "@coral-xyz/anchor": "^0.31.1",
     "@types/chai": "^4.3.11",
