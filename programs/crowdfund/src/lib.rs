@@ -49,6 +49,8 @@ pub mod crowdfund {
             .raised
             .checked_add(amount)
             .ok_or(CrowdfundError::MathOverflow)?;
+        donation.donor = ctx.accounts.donor.key();
+        donation.campaign = campaign.key();
         donation.amount = donation
             .amount
             .checked_add(amount)

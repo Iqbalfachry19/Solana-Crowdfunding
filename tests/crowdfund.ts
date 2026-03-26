@@ -125,6 +125,93 @@ describe("crowdfund", () => {
     console.log(`[Success] All checks passed for localnet!`);
   });
 
+  it("allows donor to refund if goal is not reached", async function () {
+    if (isDevnet) {
+      console.log("Skipping localnet refund test because we are on devnet.");
+      return this.skip();
+    }
+
+    const campaign = Keypair.generate();
+    const donor = Keypair.generate();
+    console.log(`[Refund Test] Created campaign at ${campaign.publicKey.toBase58()}`);
+    console.log(`[Refund Test] Donor is ${donor.publicKey.toBase58()}`);
+
+    await airdrop(donor.publicKey, 10);
+
+    const now = Math.floor(Date.now() / 1000);
+    const deadline = new anchor.BN(now + 2); // 2 seconds deadline
+    const goal = new anchor.BN(100 * anchor.web3.LAMPORTS_PER_SOL); // High goal
+
+    console.log(`[Refund Test] Creating campaign: Goal=100 SOL, Deadline=${deadline}`);
+    await program.methods
+      .createCampaign(goal, deadline)
+      .accounts({
+        campaign: campaign.publicKey,
+      })
+      .signers([campaign])
+      .rpc();
+
+    const contributionAmount = 5;
+    const contribution = new anchor.BN(contributionAmount * anchor.web3.LAMPORTS_PER_SOL);
+    console.log(`[Refund Test] Donor contributing ${contributionAmount} SOL...`);
+    await program.methods
+      .contribute(contribution)
+      .accounts({
+        donor: donor.publicKey,
+        campaign: campaign.publicKey,
+      })
+      .signers([donor])
+      .rpc();
+
+    console.log(`[Refund Test] Attempting refund BEFORE deadline...`);
+    try {
+      await program.methods
+        .refund()
+        .accounts({
+          donor: donor.publicKey,
+          campaign: campaign.publicKey,
+        })
+        .signers([donor])
+        .rpc();
+      throw new Error("refund before deadline should fail");
+    } catch (err) {
+      console.log(`[Refund Test] Correctly received expected error: CampaignNotEnded`);
+      expect(`${err}`).to.contain("CampaignNotEnded");
+    }
+
+    console.log(`[Refund Test] Waiting 3 seconds for campaign to end...`);
+    await new Promise((r) => setTimeout(r, 3000));
+
+    const balanceBefore = await provider.connection.getBalance(donor.publicKey);
+    console.log(`[Refund Test] Donor balance before refund: ${balanceBefore / anchor.web3.LAMPORTS_PER_SOL} SOL`);
+    
+    console.log(`[Refund Test] Attempting refund AFTER deadline...`);
+    await program.methods
+      .refund()
+      .accounts({
+        donor: donor.publicKey,
+        campaign: campaign.publicKey,
+      })
+      .signers([donor])
+      .rpc();
+
+    const balanceAfter = await provider.connection.getBalance(donor.publicKey);
+    console.log(`[Refund Test] Donor balance after refund: ${balanceAfter / anchor.web3.LAMPORTS_PER_SOL} SOL`);
+    
+    expect(balanceAfter).to.be.greaterThan(balanceBefore);
+    
+    // Check contribution account state
+    const [donationPDA] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("donation"), campaign.publicKey.toBuffer(), donor.publicKey.toBuffer()],
+      program.programId
+    );
+    const donationAccount = await program.account.donation.fetch(donationPDA);
+    console.log(`[Refund Test] Donation account amount: ${donationAccount.amount.toNumber()}`);
+    expect(donationAccount.amount.toNumber()).to.equal(0);
+
+    console.log(`[Refund Test] Success! Funds refunded correctly.`);
+  });
+
   it("follows the checklist on devnet", async function () {
     if (!isDevnet) {
       console.log("Skipping devnet test because we are on localnet.");
