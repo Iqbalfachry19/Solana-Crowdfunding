@@ -169,15 +169,16 @@ pub struct Contribute<'info> {
     )]
     pub vault: SystemAccount<'info>,
 
-    #[account(
-        init_if_needed,
-        payer = donor,
-        space = 8 + Donation::SIZE,
-        seeds = [b"donation", campaign.key().as_ref(), donor.key().as_ref()],
-        bump,
-        constraint = donation.donor == Pubkey::default() || donation.donor == donor.key(),
-    )]
-    pub donation: Account<'info, Donation>,
+#[account(
+    init_if_needed,
+    payer = donor,
+    space = 8 + Donation::SIZE,
+    seeds = [b"donation", campaign.key().as_ref(), donor.key().as_ref()],
+    bump,
+    constraint = donation.donor == Pubkey::default() || donation.donor == donor.key() @ CrowdfundError::InvalidDonor,
+    constraint = donation.campaign == Pubkey::default() || donation.campaign == campaign.key() @ CrowdfundError::InvalidCampaign,
+)]
+pub donation: Account<'info, Donation>,
     pub system_program: Program<'info, System>,
 }
 
@@ -268,4 +269,8 @@ pub enum CrowdfundError {
     InvalidAmount,
     #[msg("Math overflow")]
     MathOverflow,
+    #[msg("Invalid donor for this donation account")]  
+    InvalidDonor,
+    #[msg("Invalid campaign for this donation account")]
+    InvalidCampaign,
 }
