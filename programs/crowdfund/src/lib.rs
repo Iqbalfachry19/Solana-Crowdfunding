@@ -28,7 +28,7 @@ pub mod crowdfund {
 
         let campaign = &mut ctx.accounts.campaign;
         let clock = Clock::get()?;
-        require!(clock.unix_timestamp < campaign.deadline, CrowdfundError::CampaignNotEnded);
+        require!(clock.unix_timestamp < campaign.deadline, CrowdfundError::CampaignEnded);
         let donation = &mut ctx.accounts.donation;
 
         let transfer_ix = anchor_lang::solana_program::system_instruction::transfer(
@@ -262,6 +262,8 @@ pub enum CrowdfundError {
     GoalReached,
     #[msg("Campaign not ended yet")]
     CampaignNotEnded,
+    #[msg("Campaign already ended")]
+    CampaignEnded,
     #[msg("Nothing to refund")]
     NothingToRefund,
     #[msg("Amount must be positive")]
