@@ -4,7 +4,7 @@ Anchor-based implementation of the crowdfunding spec.
 
 ## Instructions
 
-- **`create_campaign(goal, deadline)`**: Initializes a new crowdfunding campaign. The `goal` (in lamports) and `deadline` (Unix timestamp) are set. The `campaign` account is created, and the `vault` PDA is derived to hold the funds.
+- **`create_campaign(goal, deadline)`**: Initializes a new crowdfunding campaign. The `goal` (in lamports) and `deadline` (Unix timestamp) are set. The `campaign` account is created, and the `vault` PDA is derived as the future escrow for contributions.
 - **`contribute(amount)`**: Allows a donor to contribute a specific `amount` (in lamports) to an active campaign. Funds are transferred to the `vault` PDA. A `donation` PDA is created on the donor's first contribution, or updated to accumulate the total if they have contributed before.
 - **`withdraw()`**: Enables the campaign creator to withdraw all funds from the `vault` PDA if the campaign's `goal` has been met and the `deadline` has passed.
 - **`refund()`**: Allows a donor to claim a full refund of their contribution if the campaign failed to reach its `goal` by the `deadline`. Funds are transferred from the `vault` PDA back to the donor's wallet.
