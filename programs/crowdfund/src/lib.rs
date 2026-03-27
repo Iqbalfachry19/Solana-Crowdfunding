@@ -124,12 +124,6 @@ pub mod crowdfund {
             signer,
         )?;
 
-        donation.amount = 0;
-        campaign.raised = campaign
-            .raised
-            .checked_sub(amount)
-            .ok_or(CrowdfundError::MathOverflow)?;
-
         msg!("Refunded: {} lamports", amount);
         Ok(())
     }
@@ -251,8 +245,6 @@ impl Donation {
 pub enum CrowdfundError {
     #[msg("Deadline must be in the future")]
     DeadlineInPast,
-    #[msg("Unauthorized")]
-    Unauthorized,
     #[msg("Campaign already claimed")]
     AlreadyClaimed,
     #[msg("Goal not reached")]
