@@ -176,7 +176,8 @@ pub struct Contribute<'info> {
         payer = donor,
         space = 8 + Donation::SIZE,
         seeds = [b"donation", campaign.key().as_ref(), donor.key().as_ref()],
-        bump
+        bump,
+        constraint = donation.donor == Pubkey::default() || donation.donor == donor.key(),
     )]
     pub donation: Account<'info, Donation>,
     pub system_program: Program<'info, System>,
