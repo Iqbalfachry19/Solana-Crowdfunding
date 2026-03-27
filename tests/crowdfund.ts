@@ -200,14 +200,14 @@ describe("crowdfund", () => {
     
     expect(balanceAfter).to.be.greaterThan(balanceBefore);
     
-    // Check contribution account state
+    // Check contribution account state (it should be closed)
     const [donationPDA] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from("donation"), campaign.publicKey.toBuffer(), donor.publicKey.toBuffer()],
       program.programId
     );
-    const donationAccount = await program.account.donation.fetch(donationPDA);
-    console.log(`[Refund Test] Donation account amount: ${donationAccount.amount.toNumber()}`);
-    expect(donationAccount.amount.toNumber()).to.equal(0);
+    const donationAccountInfo = await provider.connection.getAccountInfo(donationPDA);
+    expect(donationAccountInfo).to.be.null;
+    console.log(`[Refund Test] Donation account successfully closed.`);
 
     console.log(`[Refund Test] Success! Funds refunded correctly.`);
   });

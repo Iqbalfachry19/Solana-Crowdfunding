@@ -218,7 +218,8 @@ pub struct Refund<'info> {
     #[account(
         mut,
         seeds = [b"donation", campaign.key().as_ref(), donor.key().as_ref()],
-        bump
+        bump,
+        close = donor
     )]
     pub donation: Account<'info, Donation>,
     pub system_program: Program<'info, System>,
