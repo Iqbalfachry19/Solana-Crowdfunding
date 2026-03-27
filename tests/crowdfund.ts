@@ -48,7 +48,7 @@ describe("crowdfund", () => {
     await airdrop(donor.publicKey, 1200);
 
     const now = Math.floor(Date.now() / 1000);
-    const deadline = new anchor.BN(now + 2); // 2 seconds from now
+    const deadline = new anchor.BN(now + 2); // 2 seconds 
     const goal = new anchor.BN(1000 * anchor.web3.LAMPORTS_PER_SOL);
 
     console.log(`[Campaign] Creating campaign: Goal=${goal.div(new anchor.BN(anchor.web3.LAMPORTS_PER_SOL))} SOL, Deadline=${deadline}`);
@@ -140,7 +140,7 @@ describe("crowdfund", () => {
 
     const now = Math.floor(Date.now() / 1000);
     const deadline = new anchor.BN(now + 2); // 2 seconds deadline
-    const goal = new anchor.BN(100 * anchor.web3.LAMPORTS_PER_SOL); // High goal
+    const goal = new anchor.BN(100 * anchor.web3.LAMPORTS_PER_SOL);
 
     console.log(`[Refund Test] Creating campaign: Goal=100 SOL, Deadline=${deadline}`);
     await program.methods
@@ -184,7 +184,7 @@ describe("crowdfund", () => {
 
     const balanceBefore = await provider.connection.getBalance(donor.publicKey);
     console.log(`[Refund Test] Donor balance before refund: ${balanceBefore / anchor.web3.LAMPORTS_PER_SOL} SOL`);
-    
+
     console.log(`[Refund Test] Attempting refund AFTER deadline...`);
     await program.methods
       .refund()
@@ -197,10 +197,10 @@ describe("crowdfund", () => {
 
     const balanceAfter = await provider.connection.getBalance(donor.publicKey);
     console.log(`[Refund Test] Donor balance after refund: ${balanceAfter / anchor.web3.LAMPORTS_PER_SOL} SOL`);
-    
+
     expect(balanceAfter).to.be.greaterThan(balanceBefore);
-    
-    // Check contribution account state (it should be closed)
+
+
     const [donationPDA] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from("donation"), campaign.publicKey.toBuffer(), donor.publicKey.toBuffer()],
       program.programId
@@ -227,7 +227,7 @@ describe("crowdfund", () => {
     await airdrop(donor.publicKey, 1.5);
 
     const now = Math.floor(Date.now() / 1000);
-    const deadline = new anchor.BN(now + 10); // 10 seconds from now
+    const deadline = new anchor.BN(now + 10); // 10 seconds
     const goal = new anchor.BN(1 * anchor.web3.LAMPORTS_PER_SOL);
 
     console.log(`[Campaign] Creating campaign: Goal=${goal.div(new anchor.BN(anchor.web3.LAMPORTS_PER_SOL))} SOL, Deadline=${deadline}`);
