@@ -146,13 +146,12 @@ pub struct CreateCampaign<'info> {
     )]
     pub campaign: Account<'info, Campaign>,
 
-    /// CHECK: PDA vault derived from seeds; holds SOL only.
     #[account(
         mut,
         seeds = [b"vault", campaign.key().as_ref()],
         bump
     )]
-    pub vault: AccountInfo<'info>,
+    pub vault: SystemAccount<'info>,
     pub system_program: Program<'info, System>,
 }
 
@@ -163,13 +162,12 @@ pub struct Contribute<'info> {
     #[account(mut)]
     pub campaign: Account<'info, Campaign>,
 
-    /// CHECK: PDA vault derived from seeds; holds SOL only.
     #[account(
         mut,
         seeds = [b"vault", campaign.key().as_ref()],
         bump
     )]
-    pub vault: AccountInfo<'info>,
+    pub vault: SystemAccount<'info>,
 
     #[account(
         init_if_needed,
@@ -190,13 +188,12 @@ pub struct Withdraw<'info> {
     #[account(mut, has_one = creator)]
     pub campaign: Account<'info, Campaign>,
 
-    /// CHECK: PDA vault derived from seeds; holds SOL only.
     #[account(
         mut,
         seeds = [b"vault", campaign.key().as_ref()],
         bump
     )]
-    pub vault: AccountInfo<'info>,
+    pub vault: SystemAccount<'info>,
     pub system_program: Program<'info, System>,
 }
 
@@ -207,13 +204,12 @@ pub struct Refund<'info> {
     #[account(mut)]
     pub campaign: Account<'info, Campaign>,
 
-    /// CHECK: PDA vault derived from seeds; holds SOL only.
     #[account(
         mut,
         seeds = [b"vault", campaign.key().as_ref()],
         bump
     )]
-    pub vault: AccountInfo<'info>,
+    pub vault: SystemAccount<'info>,
     
     #[account(
         mut,
