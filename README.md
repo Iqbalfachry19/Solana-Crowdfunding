@@ -15,6 +15,23 @@ Anchor-based implementation of the crowdfunding spec.
 - **Donation**: `[b"donation", campaign_pubkey, donor_pubkey]`
     - This account stores metadata about a specific donor's contribution to a specific campaign, primarily the total `amount` donated, ensuring accurate records for refund processing.
 
+## State
+```rust
+pub struct Campaign {
+    pub creator: Pubkey,  // 32
+    pub goal:    u64,     //  8
+    pub raised:  u64,     //  8
+    pub deadline: i64,    //  8
+    pub claimed: bool,    //  1
+}                         // = 57 bytes + 8 discriminator
+
+pub struct Donation {
+    pub donor:    Pubkey, // 32
+    pub campaign: Pubkey, // 32
+    pub amount:   u64,    //  8
+}                         // = 72 bytes + 8 discriminator
+```
+
 ## Build
 
 ```bash
