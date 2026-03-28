@@ -124,6 +124,12 @@ pub mod crowdfund {
             signer,
         )?;
 
+        donation.amount = 0;
+        campaign.raised = campaign
+            .raised
+            .checked_sub(amount)
+            .ok_or(CrowdfundError::MathOverflow)?;
+
         msg!("Refunded: {} lamports", amount);
         Ok(())
     }
