@@ -147,7 +147,6 @@ pub struct CreateCampaign<'info> {
     pub campaign: Account<'info, Campaign>,
 
     #[account(
-        mut,
         seeds = [b"vault", campaign.key().as_ref()],
         bump
     )]
