@@ -185,13 +185,13 @@ pub donation: Account<'info, Donation>,
 pub struct Withdraw<'info> {
     #[account(mut)]
     pub creator: Signer<'info>,
-    #[account(mut, has_one = creator)]
+    #[account(mut, has_one = creator @ CrowdfundError::Unauthorized)]
     pub campaign: Account<'info, Campaign>,
 
     #[account(
         mut,
         seeds = [b"vault", campaign.key().as_ref()],
-        bump
+        bump,
     )]
     pub vault: SystemAccount<'info>,
     pub system_program: Program<'info, System>,
@@ -248,6 +248,8 @@ impl Donation {
 
 #[error_code]
 pub enum CrowdfundError {
+    #[msg("You are not authorized to perform this action.")]
+    Unauthorized,
     #[msg("Deadline must be in the future")]
     DeadlineInPast,
     #[msg("Campaign already claimed")]
